@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TTS Fullscreen Workspace</title>
+    <title>TTS Text Workspace</title>
     <style>
         * {
             box-sizing: border-box;
@@ -14,51 +14,60 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1e1e1e;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #121212;
         }
-        
-        /* Floating Header / Control Bar */
+
+        /* Right-Aligned Transparent Floating Toolbar */
         .floating-bar {
             position: fixed;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 20px;
+            right: 20px;
             z-index: 1000;
             display: flex;
-            gap: 12px;
-            background: rgba(30, 30, 30, 0.75);
-            backdrop-filter: blur(10px);
-            padding: 8px 16px;
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 8px 12px;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
 
         .btn {
-            padding: 8px 18px;
-            font-size: 14px;
+            padding: 8px 16px;
+            font-size: 13px;
             font-weight: 600;
-            border: none;
-            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 18px;
             cursor: pointer;
             transition: all 0.2s ease;
-            color: white;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
             outline: none;
         }
 
-        .btn-select {
-            background-color: #2563eb;
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
         }
-        .btn-select:hover {
-            background-color: #1d4ed8;
+
+        .btn-paste {
+            background: rgba(37, 99, 235, 0.4);
+            border-color: rgba(37, 99, 235, 0.5);
+        }
+        .btn-paste:hover {
+            background: rgba(37, 99, 235, 0.7);
         }
 
         .btn-clear {
-            background-color: #dc2626;
+            background: rgba(220, 38, 38, 0.3);
+            border-color: rgba(220, 38, 38, 0.4);
         }
         .btn-clear:hover {
-            background-color: #b91c1c;
+            background: rgba(220, 38, 38, 0.6);
         }
 
         /* Fullscreen Textarea */
@@ -77,39 +86,54 @@
         }
 
         textarea::placeholder {
-            color: #666;
+            color: #555555;
         }
     </style>
 </head>
 <body>
 
+    <!-- Top Right Floating Buttons -->
     <div class="floating-bar">
-        <button class="btn btn-select" onclick="selectAllText()"> Select All</button>
-        <button class="btn btn-clear" onclick="clearText()"> Clear</button>
+        <button class="btn btn-paste" onclick="pasteText()">Paste</button>
+        <button class="btn" onclick="selectAllText()">Select All</button>
+        <button class="btn btn-clear" onclick="clearText()">Clear</button>
     </div>
 
-    <textarea id="userInput" placeholder="यहाँ टेक्स्ट पेस्ट करें (Ctrl + V)... पेस्ट करते ही टेक्स्ट अपने आप सिलेक्ट हो जाएगा!" autofocus></textarea>
+    <!-- Fullscreen Input Area -->
+    <textarea id="userInput" placeholder="यहाँ 'Paste' बटन दबाएं या Ctrl + V से टेक्स्ट पेस्ट करें..." autofocus></textarea>
 
 <script>
     const textarea = document.getElementById('userInput');
 
-    // 1. One-click Select All Function
+    // 1. One-click Paste from Clipboard
+    async function pasteText() {
+        try {
+            const text = await navigator.clipboard.readText();
+            textarea.value = text;
+            textarea.focus();
+            textarea.select(); // Paste करते ही Auto-Select
+        } catch (err) {
+            alert('क्लिपबोर्ड एक्सेस करने के लिए कृपया ब्राउज़र में परमिशन Allow करें या डायरेक्ट Ctrl+V का उपयोग करें।');
+        }
+    }
+
+    // 2. Select All Function
     function selectAllText() {
         textarea.focus();
         textarea.select();
     }
 
-    // 2. Clear Function
+    // 3. Clear Function
     function clearText() {
         textarea.value = '';
         textarea.focus();
     }
 
-    // 3. Auto-Select on Paste Event
+    // 4. Manual Paste Event (Ctrl + V)
     textarea.addEventListener('paste', () => {
         setTimeout(() => {
             textarea.select();
-        }, 50); // Paste होने के तुरंत बाद टेक्स्ट ऑटो-सिलेक्ट हो जाएगा
+        }, 50);
     });
 </script>
 
