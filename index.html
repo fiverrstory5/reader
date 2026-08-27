@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTS Fullscreen Workspace</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e1e;
+        }
+        
+        /* Floating Header / Control Bar */
+        .floating-bar {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 12px;
+            background: rgba(30, 30, 30, 0.75);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .btn {
+            padding: 8px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: white;
+            outline: none;
+        }
+
+        .btn-select {
+            background-color: #2563eb;
+        }
+        .btn-select:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-clear {
+            background-color: #dc2626;
+        }
+        .btn-clear:hover {
+            background-color: #b91c1c;
+        }
+
+        /* Fullscreen Textarea */
+        textarea {
+            width: 100vw;
+            height: 100vh;
+            padding: 80px 40px 40px 40px;
+            font-size: 18px;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background-color: #121212;
+            border: none;
+            outline: none;
+            resize: none;
+            font-family: inherit;
+        }
+
+        textarea::placeholder {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="floating-bar">
+        <button class="btn btn-select" onclick="selectAllText()"> Select All</button>
+        <button class="btn btn-clear" onclick="clearText()"> Clear</button>
+    </div>
+
+    <textarea id="userInput" placeholder="यहाँ टेक्स्ट पेस्ट करें (Ctrl + V)... पेस्ट करते ही टेक्स्ट अपने आप सिलेक्ट हो जाएगा!" autofocus></textarea>
+
+<script>
+    const textarea = document.getElementById('userInput');
+
+    // 1. One-click Select All Function
+    function selectAllText() {
+        textarea.focus();
+        textarea.select();
+    }
+
+    // 2. Clear Function
+    function clearText() {
+        textarea.value = '';
+        textarea.focus();
+    }
+
+    // 3. Auto-Select on Paste Event
+    textarea.addEventListener('paste', () => {
+        setTimeout(() => {
+            textarea.select();
+        }, 50); // Paste होने के तुरंत बाद टेक्स्ट ऑटो-सिलेक्ट हो जाएगा
+    });
+</script>
+
+</body>
+</html>
