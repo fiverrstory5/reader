@@ -104,16 +104,19 @@
 
 <script>
     const textarea = document.getElementById('userInput');
+    const prefixText = "Hello.\n"; // शुरुआत में जुड़ने वाला टेक्स्ट
 
-    // 1. One-click Paste from Clipboard
+    // 1. One-click Paste from Clipboard with Prefix
     async function pasteText() {
         try {
-            const text = await navigator.clipboard.readText();
-            textarea.value = text;
-            textarea.focus();
-            textarea.select(); // Paste करते ही Auto-Select
+            const clipboardContent = await navigator.clipboard.readText();
+            if (clipboardContent) {
+                textarea.value = prefixText + clipboardContent;
+                textarea.focus();
+                textarea.select(); // Hello. के साथ पूरा टेक्स्ट सिलेक्ट हो जाएगा
+            }
         } catch (err) {
-            alert('क्लिपबोर्ड एक्सेस करने के लिए कृपया ब्राउज़र में परमिशन Allow करें या डायरेक्ट Ctrl+V का उपयोग करें।');
+            alert('क्लिपबोर्ड एक्सेस करने के लिए कृपया परमिशन Allow करें या डायरेक्ट Ctrl+V का उपयोग करें।');
         }
     }
 
@@ -129,11 +132,20 @@
         textarea.focus();
     }
 
-    // 4. Manual Paste Event (Ctrl + V)
-    textarea.addEventListener('paste', () => {
+    // 4. Manual Paste Event (Ctrl + V) with Prefix
+    textarea.addEventListener('paste', (e) => {
+        e.preventDefault(); // डिफ़ॉल्ट पेस्ट को रोकें
+        
+        // क्लिपबोर्ड डेटा निकालें
+        const pastedData = (e.clipboardData || window.clipboardData).getData('text');
+        
+        // Hello. के साथ पेस्ट करें
+        textarea.value = prefixText + pastedData;
+        
+        // ऑटो-सिलेक्ट करें
         setTimeout(() => {
             textarea.select();
-        }, 50);
+        }, 30);
     });
 </script>
 
