@@ -70,8 +70,8 @@
             background: rgba(220, 38, 38, 0.6);
         }
 
-        /* Fullscreen Textarea */
-        textarea {
+        /* Editable Workspace Area (Extension Highlight Compatible) */
+        #editor {
             width: 100vw;
             height: 100vh;
             padding: 80px 40px 40px 40px;
@@ -81,11 +81,13 @@
             background-color: #121212;
             border: none;
             outline: none;
-            resize: none;
-            font-family: inherit;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
-        textarea::placeholder {
+        #editor:empty:before {
+            content: "यहाँ 'Paste' बटन दबाएं या Ctrl + V से टेक्स्ट पेस्ट करें...";
             color: #555555;
         }
     </style>
@@ -99,52 +101,52 @@
         <button class="btn btn-clear" onclick="clearText()">Clear</button>
     </div>
 
-    <!-- Fullscreen Input Area -->
-    <textarea id="userInput" placeholder="यहाँ 'Paste' बटन दबाएं या Ctrl + V से टेक्स्ट पेस्ट करें..." autofocus></textarea>
+    <!-- Fullscreen Editable Input Area -->
+    <div id="editor" contenteditable="true" autofocus></div>
 
 <script>
-    const textarea = document.getElementById('userInput');
-    const prefixText = "Hello.\n"; // शुरुआत में जुड़ने वाला टेक्स्ट
+    const editor = document.getElementById('editor');
+    const prefixText = "Hello.\n";
 
-    // 1. One-click Paste from Clipboard with Prefix
+    // Select All Utility Function
+    function selectAllText() {
+        editor.focus();
+        const range = document.createRange();
+        range.selectNodeContents(editor);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
+    // 1. Paste from Clipboard with Prefix
     async function pasteText() {
         try {
             const clipboardContent = await navigator.clipboard.readText();
             if (clipboardContent) {
-                textarea.value = prefixText + clipboardContent;
-                textarea.focus();
-                textarea.select(); // Hello. के साथ पूरा टेक्स्ट सिलेक्ट हो जाएगा
+                editor.innerText = prefixText + clipboardContent;
+                setTimeout(() => {
+                    selectAllText();
+                }, 30);
             }
         } catch (err) {
             alert('क्लिपबोर्ड एक्सेस करने के लिए कृपया परमिशन Allow करें या डायरेक्ट Ctrl+V का उपयोग करें।');
         }
     }
 
-    // 2. Select All Function
-    function selectAllText() {
-        textarea.focus();
-        textarea.select();
-    }
-
-    // 3. Clear Function
+    // 2. Clear Function
     function clearText() {
-        textarea.value = '';
-        textarea.focus();
+        editor.innerText = '';
+        editor.focus();
     }
 
-    // 4. Manual Paste Event (Ctrl + V) with Prefix
-    textarea.addEventListener('paste', (e) => {
-        e.preventDefault(); // डिफ़ॉल्ट पेस्ट को रोकें
-        
-        // क्लिपबोर्ड डेटा निकालें
+    // 3. Manual Paste Event (Ctrl + V) with Prefix
+    editor.addEventListener('paste', (e) => {
+        e.preventDefault();
         const pastedData = (e.clipboardData || window.clipboardData).getData('text');
+        editor.innerText = prefixText + pastedData;
         
-        // Hello. के साथ पेस्ट करें
-        textarea.value = prefixText + pastedData;
-        
-        // ऑटो-सिलेक्ट करें
         setTimeout(() => {
-            textarea.select();
+            selectAllText();
         }, 30);
     });
 </script>
