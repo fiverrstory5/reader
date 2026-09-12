@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="50%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#38bdf8" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Background rounded card -->
+  <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#bgGrad)" stroke="#38bdf8" stroke-width="1.5" stroke-opacity="0.5"/>
+
+  <!-- Speaker Cone -->
+  <g filter="url(#glow)">
+    <path d="M14 26 h6 l10 -8 v28 l-10 -8 h-6 z" fill="#f8fafc" />
+    
+    <!-- Sound Waves -->
+    <path d="M35 24 A 10 10 0 0 1 35 40" fill="none" stroke="url(#waveGrad)" stroke-width="3" stroke-linecap="round"/>
+    <path d="M41 19 A 17 17 0 0 1 41 45" fill="none" stroke="url(#waveGrad)" stroke-width="3" stroke-linecap="round"/>
+    <path d="M47 14 A 24 24 0 0 1 47 50" fill="none" stroke="url(#waveGrad)" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>
