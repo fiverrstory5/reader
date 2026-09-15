@@ -81,6 +81,26 @@ body, html {
     color: #f87171;
 }
 
+.btn-clean-toggle {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #cbd5e1;
+}
+.btn-clean-toggle:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+.btn-clean-toggle.active {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #6ee7b7;
+}
+.btn-clean-toggle.active:hover {
+    background: rgba(16, 185, 129, 0.22);
+    border-color: rgba(16, 185, 129, 0.5);
+    color: #a7f3d0;
+}
+
 /* Speed Slider Group */
 .slider-group {
     display: flex;
@@ -158,7 +178,7 @@ body, html {
     line-height: 1.55; /* Adjusted for compact, natural line spacing */
     color: #d4d4d8;
     word-wrap: break-word;
-    padding-bottom: 80px;
+    padding-bottom: calc(55vh + 80px);
 }
 
 .editor[placeholder]:empty:before {
@@ -204,42 +224,47 @@ body, html {
 }
 
 /* --------------------------------------------------------------------------
-   Auto-Scroll Resume Pill
+   Auto-Scroll Resume Pill (Compact Floating Icon Button)
    -------------------------------------------------------------------------- */
 .scroll-resume-pill {
     position: fixed;
-    top: 75px;
+    top: 76px;
     right: 24px;
     z-index: 999;
-    background: rgba(30, 32, 40, 0.92);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(59, 130, 246, 0.4);
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    background: rgba(24, 26, 34, 0.95);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(59, 130, 246, 0.5);
     color: #93c5fd;
-    padding: 5px 12px;
-    border-radius: 16px;
-    font-size: 11px;
-    font-weight: 500;
+    font-size: 16px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-    transition: all 0.2s ease;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     opacity: 0;
     pointer-events: none;
-    transform: translateY(-5px);
+    transform: scale(0.85);
+    outline: none;
 }
 
 .scroll-resume-pill.show {
     opacity: 1;
     pointer-events: auto;
-    transform: translateY(0);
+    transform: scale(1);
 }
 
 .scroll-resume-pill:hover {
-    background: rgba(37, 99, 235, 0.3);
+    background: rgba(37, 99, 235, 0.35);
     border-color: #60a5fa;
     color: #ffffff;
+    transform: scale(1.1);
+    box-shadow: 0 0 16px rgba(59, 130, 246, 0.55);
 }
 
 /* --------------------------------------------------------------------------

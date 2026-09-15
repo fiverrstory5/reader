@@ -18,6 +18,9 @@ const lblStatus = document.getElementById('lblStatus');
 const trackBar = document.getElementById('trackBar');
 const trackFill = document.getElementById('trackFill');
 const scrollResumePill = document.getElementById('scrollResumePill');
+const btnToggleClean = document.getElementById('btnToggleClean');
+const cleanIcon = document.getElementById('cleanIcon');
+const cleanLabel = document.getElementById('cleanLabel');
 
 // State Variables
 let sentences = [];
@@ -26,6 +29,9 @@ let isPlaying = false;
 let currentSpeed = 1.45;
 let sessionId = 0;
 let hindiVoice = null;
+let isCleanMode = true;
+let rawOriginalText = '';
+let cleanedText = '';
 
 // Smart Auto-Scroll State
 let isAutoScrollEnabled = true;
@@ -180,6 +186,118 @@ scrollResumePill.addEventListener('click', () => {
         sentences[currentIndex].element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 });
+
+// --------------------------------------------------------------------------
+// 4.5 Intelligent Text & Symbol Sanitizer (Junk Cleaner for Clean TTS)
+// --------------------------------------------------------------------------
+function cleanTextForTTS(rawText) {
+    if (!rawText) return '';
+    let s = String(rawText);
+
+    // 1. Remove non-printable / zero-width spaces and control characters
+    s = s.replace(/[\u200B-\u200D\uFEFF\u00A0]/g, ' ');
+
+    // 2. Markdown Links: [Link Title](https://...) -> Link Title
+    s = s.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+
+    // 3. Raw URLs: remove http/https URLs so TTS doesn't spell out links
+    s = s.replace(/https?:\/\/\S+/gi, '');
+
+    // 4. Code blocks and inline code markers: ``` code ``` -> code
+    s = s.replace(/```[\s\S]*?```/g, (match) => {
+        return match.replace(/```[a-z0-9_-]*/gi, '').replace(/```/g, '');
+    });
+    s = s.replace(/`+/g, '');
+
+    // 5. Markdown Headings (#, ##, ###) at line start or surrounded by space
+    s = s.replace(/(^|\n)\s*#+\s*/g, '$1');
+    s = s.replace(/(^|\s)#+(?=\s|$)/g, '$1');
+
+    // 6. Markdown Blockquotes (> text)
+    s = s.replace(/(^|\n)\s*>+\s*/g, '$1');
+
+    // 7. Horizontal dividers (---, ===, ___, ***)
+    s = s.replace(/(^|\n)\s*[-=*_]{3,}\s*($|\n)/g, '$1\n');
+
+    // 8. Markdown Bold / Italic / Strikethrough markers (keep text inside)
+    s = s.replace(/\*{1,3}([^*\n]+)\*{1,3}/g, '$1');
+    s = s.replace(/_{1,3}([^_\n]+)_{1,3}/g, '$1');
+    s = s.replace(/~{1,2}([^~\n]+)~{1,2}/g, '$1');
+
+    // 9. Junk / Decorative Symbols, Brackets, Arrows, Bullets, Odd Currencies
+    // Strips user-specified: ##***°`><]}}€£ as well as bullets, arrows, degree, etc.
+    s = s.replace(/[#*°`><\[\]{}€£¥•●○■□▪▫◆◇★☆✦✧➔➜→←⇒►▶➤▲▼※§¶^|\\~_]/g, ' ');
+
+    // 10. Clean up repeated punctuation noise (e.g. ,,,, -> ,  ||  .... -> .)
+    s = s.replace(/([.।!?]){2,}/g, '$1');
+    s = s.replace(/,{2,}/g, ',');
+    s = s.replace(/[-]{2,}/g, ' ');
+
+    // 11. Normalize spaces around valid speech punctuation
+    s = s.replace(/\s+([,।!?;:])/g, '$1');
+    s = s.replace(/([,।!?;:])(?!\s|$)/g, '$1 ');
+
+    // 12. Normalize multiple spaces and extra blank lines
+    s = s.replace(/[ \t]+/g, ' ');
+    s = s.replace(/(^|\n)[ \t]+/g, '$1');
+    s = s.replace(/[ \t]+($|\n)/g, '$1');
+    s = s.replace(/\n\s*\n\s*\n+/g, '\n\n');
+
+    return s.trim();
+}
+
+function updateCleanToggleUI() {
+    if (!btnToggleClean) return;
+    if (isCleanMode) {
+        btnToggleClean.classList.add('active');
+        cleanIcon.textContent = '🧹';
+        cleanLabel.textContent = 'Clean Text';
+        btnToggleClean.title = 'Clean mode active (Click to view Original text)';
+    } else {
+        btnToggleClean.classList.remove('active');
+        cleanIcon.textContent = '📄';
+        cleanLabel.textContent = 'Original';
+        btnToggleClean.title = 'Original mode active (Click to view Clean text)';
+    }
+}
+
+function toggleCleanMode() {
+    isCleanMode = !isCleanMode;
+    updateCleanToggleUI();
+
+    // If we have text loaded, switch views dynamically
+    if (rawOriginalText) {
+        const activeText = isCleanMode ? (cleanedText || cleanTextForTTS(rawOriginalText)) : rawOriginalText;
+        const bundles = processTextInto20WordBundles(activeText, 20);
+        if (!bundles.length) return;
+
+        // Maintain relative reading position if currently playing or navigated
+        const currentRatio = (sentences.length > 0 && currentIndex >= 0) ? (currentIndex / sentences.length) : 0;
+        const wasPlaying = isPlaying;
+
+        if (wasPlaying) {
+            window.speechSynthesis.cancel();
+            isPlaying = false;
+            stopTimer();
+        }
+
+        renderSentences(bundles);
+
+        const targetIndex = Math.min(sentences.length - 1, Math.max(0, Math.round(currentRatio * (sentences.length - 1))));
+        currentIndex = targetIndex;
+
+        if (wasPlaying) {
+            playSentence(targetIndex);
+        } else {
+            highlightSentence(targetIndex);
+            updateProgress();
+        }
+    }
+}
+
+if (btnToggleClean) {
+    btnToggleClean.addEventListener('click', toggleCleanMode);
+}
 
 // --------------------------------------------------------------------------
 // 5. 20-Word Sentence Bundling & Punctuation-to-Comma Logic
@@ -455,7 +573,12 @@ function handlePastedText(rawText) {
     if (!rawText || !rawText.trim()) return;
 
     stopPlayback();
-    const bundles = processTextInto20WordBundles(rawText, 20);
+    rawOriginalText = rawText.trim();
+    cleanedText = cleanTextForTTS(rawOriginalText);
+
+    // Use cleaned text by default if clean mode is enabled
+    const activeText = isCleanMode ? (cleanedText || rawOriginalText) : rawOriginalText;
+    const bundles = processTextInto20WordBundles(activeText, 20);
     if (!bundles.length) return;
 
     isAutoScrollEnabled = true;
@@ -480,6 +603,8 @@ btnClear.addEventListener('click', () => {
     stopPlayback();
     editor.innerHTML = '';
     sentences = [];
+    rawOriginalText = '';
+    cleanedText = '';
     currentIndex = -1;
     totalDurationSeconds = 0;
     currentElapsedSeconds = 0;

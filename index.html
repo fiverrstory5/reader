@@ -24,6 +24,12 @@
             Clear
         </button>
 
+        <!-- Clean Text Toggle Button -->
+        <button class="btn btn-clean-toggle active" id="btnToggleClean" title="Toggle Clean vs Original text">
+            <span id="cleanIcon">🧹</span>
+            <span id="cleanLabel">Clean Text</span>
+        </button>
+
         <!-- Speed Scroller (Slider) -->
         <div class="slider-group" title="Scroll / Slide to adjust playback speed">
             <span class="slider-label">Speed:</span>
@@ -32,10 +38,10 @@
         </div>
     </div>
 
-    <!-- Smart Auto-Scroll Resume Indicator -->
-    <div class="scroll-resume-pill" id="scrollResumePill" title="Click to center back on the currently speaking sentence">
-        📍 Auto-scroll paused (Click to resume)
-    </div>
+    <!-- Compact Smart Auto-Scroll Re-center Button -->
+    <button class="scroll-resume-pill" id="scrollResumePill" title="Auto-scroll paused (Click to re-center)">
+        📍
+    </button>
 
     <!-- Reading Canvas -->
     <div class="workspace" id="scrollContainer">
